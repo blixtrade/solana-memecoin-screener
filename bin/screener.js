@@ -44,6 +44,10 @@ main(async () => {
   if (args.help) { console.log(HELP); return; }
   const source = String(args.source || "trending");
   const pages = Math.max(1, Math.min(10, Number(args.pages) || 2));
+  const limit = args.limit === undefined ? undefined : Number(args.limit);
+  if (args.limit !== undefined && (typeof args.limit !== "string" || !Number.isInteger(limit) || limit <= 0)) {
+    throw new Error("--limit must be a positive integer.");
+  }
   const filters = {
     minLiq: amount(args["min-liq"]), maxLiq: amount(args["max-liq"]),
     minMcap: amount(args["min-mcap"]), maxMcap: amount(args["max-mcap"]),
@@ -55,7 +59,7 @@ main(async () => {
     pumpOnly: Boolean(args["pump-only"]),
     search: typeof args.search === "string" ? args.search : undefined,
     sort: typeof args.sort === "string" ? args.sort : "vol",
-    limit: Number(args.limit) || 25,
+    ...(limit === undefined ? {} : { limit }),
   };
   const watch = args.watch ? Math.max(15, Number(args.watch) || 30) : 0;
 
