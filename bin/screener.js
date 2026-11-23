@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { readFileSync } from "node:fs";
 import { age, c, footer, main, parseArgs, pct, price, sleep, table, usd } from "../lib/core.js";
 import { load, parseAmount, parseDuration, screen, SORT_KEYS } from "../lib/screen.js";
 
@@ -27,6 +28,7 @@ Output:
   --limit <n>           Rows to show (default 25)
   --watch <seconds>     Refresh on a loop (minimum 15)
   --json                Print rows as JSON
+  --version             Print the installed version and exit
   --help                Show this help
 
 Examples:
@@ -40,8 +42,13 @@ const duration = (v) => (v === undefined ? undefined : parseDuration(v));
 const signed = (n) => (n === null ? c.dim("-") : n >= 0 ? c.green(pct(n)) : c.red(pct(n)));
 
 main(async () => {
-  const args = parseArgs(process.argv.slice(2), { booleans: ["json", "help", "pump-only"] });
+  const args = parseArgs(process.argv.slice(2), { booleans: ["json", "help", "pump-only", "version"] });
   if (args.help) { console.log(HELP); return; }
+  if (args.version) {
+    const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url)));
+    console.log(version);
+    return;
+  }
   const source = String(args.source || "trending");
   const pages = Math.max(1, Math.min(10, Number(args.pages) || 2));
   const filters = {
