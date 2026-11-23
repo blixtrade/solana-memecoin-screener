@@ -62,3 +62,25 @@ test("--dex keeps a token whose deepest pool is on another DEX, using its pool o
   assert.deepEqual(out.map((r) => r.pool), ["pump"]);
   assert.equal(screen(rows).find((r) => r.mint === "A").pool, "deep");
 });
+
+const geckoName = (name, symbol = "SYM") => fromGecko(
+  { attributes: { name: "SYM / SOL" }, relationships: { base_token: { data: { id: "solana_Mint" } } } },
+  new Map([["solana_Mint", { attributes: { name, symbol, address: "Mint" } }]]),
+);
+
+test("GeckoTerminal decodes escaped entities exactly once", () => {
+  assert.equal(geckoName("Tom &amp;lt;3 Jerry").name, "Tom &lt;3 Jerry");
+  assert.equal(geckoName("&amp;amp;").name, "&amp;");
+  assert.equal(geckoName("Jason &amp; Lucia").name, "Jason & Lucia");
+  assert.equal(geckoName("&lt;hello&gt; &quot;quote&quot; &#39;").name, "<hello> \"quote\" '");
+});
+
+test("GeckoTerminal decodes decimal and hexadecimal numeric entities in names and symbols", () => {
+  assert.equal(geckoName("Jerry&#8217;s &#x27;token&#x27;", "&#x41;&#66;").name, "Jerry’s 'token'");
+  assert.equal(geckoName("Jerry&#8217;s", "&#x41;&#66;").symbol, "AB");
+  assert.equal(geckoName("&#x1F680;").name, "🚀");
+});
+
+test("GeckoTerminal keeps malformed and out-of-range numeric references unchanged", () => {
+  assert.equal(geckoName("&#x110000; &#55296; &#xZZ;").name, "&#x110000; &#55296; &#xZZ;");
+});
