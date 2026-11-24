@@ -78,6 +78,7 @@ Output:
   --limit <n>           Rows to show (default 25)
   --watch <seconds>     Refresh on a loop (minimum 15)
   --json                Print rows as JSON
+  --version             Print the installed version and exit
   --help                Show this help
 
 Examples:
